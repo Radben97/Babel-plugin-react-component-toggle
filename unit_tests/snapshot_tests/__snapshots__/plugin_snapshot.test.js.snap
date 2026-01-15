@@ -1,0 +1,482 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`React-Toggle-Component 1. Test1: To check if plugin resolves AND gating when flag is true: 1. Test1: To check if plugin resolves AND gating when flag is true 1`] = `
+
+
+const app = () => {
+    return <div>
+    {TEST_FLAG && <Component/>}
+    </div>
+    };
+
+        
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const app = () => {
+  return (
+    <div>
+      <Component />
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 2. Test2: To check if plugin resolves AND gating when flag is false: 2. Test2: To check if plugin resolves AND gating when flag is false 1`] = `
+
+
+const app = () => {
+    return <div>
+    {internalflag && <Component/>}
+    </div>
+    };
+
+        
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const app = () => {
+  return <div></div>;
+};
+
+`;
+
+exports[`React-Toggle-Component 3. Test3: To check if plugin resolves conditionalExpressions when flag is true: 3. Test3: To check if plugin resolves conditionalExpressions when flag is true 1`] = `
+
+
+import {Component,Component1} from 'react'    
+const app = () => {
+    return <div>
+    {TEST_FLAG ? <Component/> : <Component1/>}
+    </div>
+    }
+
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component } from "react";
+const app = () => {
+  return (
+    <div>
+      <Component />
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 4. Test4: To check if plugin resolves conditionalExpressions when flag is false: 4. Test4: To check if plugin resolves conditionalExpressions when flag is false 1`] = `
+
+
+import {Component,Component1} from 'react'    
+const app = () => {
+    return <div>
+    {internalflag ? <Component/> : <Component1/>}
+    </div>
+    }
+
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component1 } from "react";
+const app = () => {
+  return (
+    <div>
+      <Component1 />
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 5. Test5: To check if plugin resolves function calls when flag is true (functionDeclaration): 5. Test5: To check if plugin resolves function calls when flag is true (functionDeclaration) 1`] = `
+
+
+import {Component1,Component2} from 'react'
+function getLayout() {
+    if (TEST_FLAG) {
+        return <Component1/>
+    } else {
+        return <Component2/>    
+    }
+}
+const app = () => {
+return <div>
+{getLayout()}
+</div>
+}
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component1 } from "react";
+const app = () => {
+  return (
+    <div>
+      <Component1 />
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 6. Test6: To check if plugin resolves function calls when flag is false (functionDeclaration): 6. Test6: To check if plugin resolves function calls when flag is false (functionDeclaration) 1`] = `
+
+
+import {Component1,Component2} from 'react'
+function getLayout() {
+    if (internalflag) {
+        return <Component1/>
+    } else {
+        return <Component2/>    
+    }
+}
+const app = () => {
+return <div>
+{getLayout()}
+</div>
+}
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component2 } from "react";
+const app = () => {
+  return (
+    <div>
+      <Component2 />
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 7. Test7: To check if plugin resolves function calls when flag is true (functionExpression): 7. Test7: To check if plugin resolves function calls when flag is true (functionExpression) 1`] = `
+
+
+import {Component1,Component2} from 'react'
+const getLayout = () => {
+    if (TEST_FLAG) {
+        return <Component1/>
+    } else {
+        return <Component2/>    
+    }
+}
+const app = () => {
+return <div>
+{getLayout()}
+</div>
+}
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component1 } from "react";
+const app = () => {
+  return (
+    <div>
+      <Component1 />
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 8. Test8: To check if plugin resolves function calls when flag is false (functionExpression): 8. Test8: To check if plugin resolves function calls when flag is false (functionExpression) 1`] = `
+
+
+import {Component1,Component2} from 'react'
+const getLayout = () => {
+    if (internalflag) {
+        return <Component1/>
+    } else {
+        return <Component2/>    
+    }
+}
+const app = () => {
+return <div>
+{getLayout()}
+</div>
+}
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component2 } from "react";
+const app = () => {
+  return (
+    <div>
+      <Component2 />
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 9. Test9: To check if plugin resolves variables with a jsx element: 9. Test9: To check if plugin resolves variables with a jsx element 1`] = `
+
+
+
+const component = <div>hello</div>
+const app = () => {
+return <div>
+{TEST_FLAG && component}
+</div>
+}
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const app = () => {
+  return (
+    <div>
+      <div>hello</div>
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 10. Test10: To check if plugin doesnt resolve AND gating for an flag not mentioned by the user: 10. Test10: To check if plugin doesnt resolve AND gating for an flag not mentioned by the user 1`] = `
+
+
+const app = () => {
+    return <div>
+    {TEST_FLAG12 && <Component/>}
+    </div>
+    };
+
+        
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+const app = () => {
+  return <div>{TEST_FLAG12 && <Component />}</div>;
+};
+
+`;
+
+exports[`React-Toggle-Component 11. Test11: To check if plugin doesnt resolve a function call for flag that is not mentioned by the user: 11. Test11: To check if plugin doesnt resolve a function call for flag that is not mentioned by the user 1`] = `
+
+
+import {Component1,Component2} from 'react'
+const getLayout = () => {
+    if (TEST_FLAG123) {
+        return <Component1/>
+    } else {
+        return <Component2/>    
+    }
+}
+const app = () => {
+return <div>
+{getLayout()}
+</div>
+}
+            
+        
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component1, Component2 } from "react";
+const getLayout = () => {
+  if (TEST_FLAG123) {
+    return <Component1 />;
+  } else {
+    return <Component2 />;
+  }
+};
+const app = () => {
+  return <div>{getLayout()}</div>;
+};
+
+`;
+
+exports[`React-Toggle-Component 12. Test12: If plugin skips toggling if it isnt part of the 5 expressions(conditional expression): 12. Test12: If plugin skips toggling if it isnt part of the 5 expressions(conditional expression) 1`] = `
+
+
+import {Component,Component1} from 'react'
+const isEnabled = TEST_FLAG && <Component />;
+const app = () => {
+    return <div>
+    {TEST_FLAG ? (SHOW_AD ? <AdBanner /> : <ComponentRender3 />) : (IS_MAINTENANCE ? <MaintenanceMode /> : null)
+    }
+    <>{internalflag && <div>hello</div>}</>
+    <div>{isEnabled}</div>
+    <>hello</>
+    </div>
+    }
+
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component, Component1 } from "react";
+const isEnabled = TEST_FLAG && <Component />;
+const app = () => {
+  return (
+    <div>
+      {TEST_FLAG ? (
+        SHOW_AD ? (
+          <AdBanner />
+        ) : (
+          <ComponentRender3 />
+        )
+      ) : IS_MAINTENANCE ? (
+        <MaintenanceMode />
+      ) : null}
+
+      <div>{isEnabled}</div>
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 13. Test13: If plugin skips toggling if it isnt part of the 5 expressions(conditional expression): 13. Test13: If plugin skips toggling if it isnt part of the 5 expressions(conditional expression) 1`] = `
+
+
+            import React from 'react';
+import {ComponentRender3,TestComponent1} from 'react';
+<div>hello</div>
+// CASE 4: Prop Drilling (Middle Layer)
+const MiddleLayer = ({ isFeatureOn }) => (
+  <div className="middle-layer">
+    <DeepComponent isFeatureOn={isFeatureOn} />
+  </div>
+);
+
+
+const TestComponent2 = () => (
+  <div className="comp-2">
+    {console.log("Rendering Component 2")}
+    <h1>Standard UI</h1>
+  </div>
+);
+
+const componentRender2 = (
+    <div className="wrapper-b">
+  {internalflag && <TestComponent1 />}
+  <TestComponent5 />
+    </div>
+  );
+const componentRender3 = (<div>hello</div>)
+const getLayout1 = () => {
+    	if (internalflag){
+        	return componentRender2
+        } else {
+        	return componentRender2
+        }
+    }
+
+function getLayout() {
+    if (internalflag) {
+      return <ComponentRender3/>;
+    } else return <TestComponent5 />;
+  };
+const getLayout2 = () => <div>hello</div>
+
+const App = () => {
+  return (
+    <div className="app-root">
+      
+      <header>
+        <h1>Product Dashboard</h1>
+      </header>
+
+      
+      
+      {internalflag ? <ContentComponent /> : <MiddleLayer isFeatureOn = {isFeatureOn}/>}
+      {TEST_FLAG && componentRender3}
+
+     
+
+      
+      {getLayout()}
+       {getLayout1()}
+	  {getLayout2()}
+       
+
+      
+       {TEST_FLAG 
+  ? (SHOW_AD ? componentRender2 : <ComponentRender3 />) 
+  : (IS_MAINTAINANCE ? <MaintenanceMode/> : null)
+}
+       <></>
+      <ContentComponent flag={internalFlag} />
+        
+      <footer>System Status: {internalFlag ? "Stable" : "Legacy"}</footer>
+       
+    </div>
+  );
+};
+
+export default App;
+       
+function greet() {}
+
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import React from "react";
+import { ComponentRender3 } from "react";
+<div>hello</div>;
+// CASE 4: Prop Drilling (Middle Layer)
+const MiddleLayer = ({ isFeatureOn }) => (
+  <div className="middle-layer">
+    <DeepComponent isFeatureOn={isFeatureOn} />
+  </div>
+);
+const TestComponent2 = () => (
+  <div className="comp-2">
+    {console.log("Rendering Component 2")}
+    <h1>Standard UI</h1>
+  </div>
+);
+const componentRender2 = (
+  <div className="wrapper-b">
+    <TestComponent5 />
+  </div>
+);
+function getLayout() {
+  if (internalflag) {
+    return <ComponentRender3 />;
+  } else return <TestComponent5 />;
+}
+const getLayout2 = () => <div>hello</div>;
+const App = () => {
+  return (
+    <div className="app-root">
+      <header>
+        <h1>Product Dashboard</h1>
+      </header>
+
+      <MiddleLayer isFeatureOn={isFeatureOn} />
+      <div>hello</div>
+
+      {getLayout()}
+      <div className="wrapper-b">
+        <TestComponent5 />
+      </div>
+      {getLayout2()}
+
+      {TEST_FLAG ? (
+        SHOW_AD ? (
+          componentRender2
+        ) : (
+          <ComponentRender3 />
+        )
+      ) : IS_MAINTAINANCE ? (
+        <MaintenanceMode />
+      ) : null}
+
+      <ContentComponent flag={internalFlag} />
+
+      <footer>System Status: {internalFlag ? "Stable" : "Legacy"}</footer>
+    </div>
+  );
+};
+export default App;
+function greet() {}
+
+`;
