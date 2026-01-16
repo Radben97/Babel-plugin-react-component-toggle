@@ -1,7 +1,8 @@
-module.exports =  function testFunc(babel) {
+export default function testFunc(babel) {
   const { types: t } = babel;
   let flagVal;
   let deadFunc = {};
+  let flagSet = {TEST_FLAG: true, internalflag: false};
   function funcBlock(flagSet,calleeName,callee,innerPath,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode) {
   		let funcDeclaration;
     	if (calleeName){funcDeclaration = innerPath.scope.getBinding(calleeName);} 
@@ -75,8 +76,12 @@ module.exports =  function testFunc(babel) {
                             varName1 = returnStatement1.get("argument").node.name;
                           	varComponent1 = innerPath.scope.getBinding(varName1);
                             const varComponentInit =  varComponent1.path.get("init");
+                            if (varComponentInit.isArrowFunctionExpression()){ 
+                              console.warn("❌ [plugin-react-component-toggle]: Variables with an arrow function is not allowed for component toggle, skipping this expression ");
+                              innerPath.skip();
+                            } else {
                             truecomponentName = varComponentInit.get("openingElement").get("name").node.name;
-                            trueelementNode = varComponentInit;
+                            trueelementNode = varComponentInit; }
                           }
                           if (returnStatement1.get("argument").isJSXElement() && innerPath.scope.getBinding(returnStatement1.get("argument").get("openingElement").get("name").node.name)) {
                           	varName1 = returnStatement1.get("argument").get("openingElement").get("name").node.name;
@@ -99,8 +104,14 @@ module.exports =  function testFunc(babel) {
                             varName2 = returnStatement2.get("argument").node.name;
                           	varComponent2 = innerPath.scope.getBinding(varName2);
                             const varComponentInit =  varComponent2.path.get("init");
+                            if (varComponentInit.isArrowFunctionExpression()){ 
+                              console.warn("❌ [plugin-react-component-toggle]: Variables with an arrow function is not allowed for component toggle, skipping this expression ");
+                              innerPath.skip();
+                        
+                            } else {
                             falsecomponentName = varComponentInit.get("openingElement").get("name").node.name;
                             falseelementNode = varComponentInit;
+                            }
                           }
                          if (returnStatement2.get("argument").isJSXElement() && innerPath.scope.getBinding(returnStatement2.get("argument").get("openingElement").get("name").node.name)) {
                             varName2 = returnStatement2.get("argument").get("openingElement").get("name").node.name;
@@ -158,7 +169,6 @@ module.exports =  function testFunc(babel) {
     	name: "React-Toggle-Component",
     	visitor: {
          	JSXExpressionContainer(path,state) {
-              	let flagSet = state.opts.flagSet || {};
                 let funcDeclaration;
               	let componentName;
               	let componentAttributes;
@@ -172,7 +182,8 @@ module.exports =  function testFunc(babel) {
                   	ConditionalExpression(innerPath) {
                    	 if (!Object.hasOwn(flagSet,innerPath.get("test").node.name)) innerPath.skip();
                       if (!innerPath.get("alternate").isJSXElement() || !innerPath.get("consequent").isJSXElement()){
-                      	innerPath.skip();
+                      	console.warn("❌ [plugin-react-component-toggle]: Nested conditional expression are not allowed for component toggle, skipping this expression");
+                        innerPath.skip();
                       }
                       else flagVal = flagSet[innerPath.get("test").node.name]; 
                       consequentComponent = innerPath.get("consequent").node;
@@ -188,6 +199,9 @@ module.exports =  function testFunc(babel) {
                       if (innerPath.get("alternate").isJSXElement()) {
                       	alternateComponentName = innerPath.get("alternate").get("openingElement").get("name").node.name;
                       	if (alternateComponentName) bindingAlternate = innerPath.scope.getBinding(alternateComponentName);
+                      }
+                      if (!innerPath.get("consequent").isJSXElement() || !innerPath.get("alternate").isJSXElement()) {
+                      	
                       }
                       isValidLogicExp = true;
                       validFlagCheck = true;
@@ -235,6 +249,7 @@ module.exports =  function testFunc(babel) {
                                 }
                               }
                             };
+                          	
                           	if (innerPath.get("right").isIdentifier() && Object.hasOwn(flagSet,innerPath.get("right").node.name)) {
                               flagVal = flagSet[innerPath.get("right").node.name];
                               if (innerPath.get("left").isJSXElement()) {
@@ -260,13 +275,18 @@ module.exports =  function testFunc(babel) {
                         	deadFunc[logicalComponentName] = {binding: logicalComonentBinding,count: 1};
                         }
                           	
+                        } else {
+                          	if (innerPath.node.operator !== "&&") console.warn("❌ [plugin-react-component-toggle]: Logical expressions should have '&&' operator for component toggle, skipping this expression ");
+                        	console.warn("❌ [plugin-react-component-toggle]: Nested logical expressions are not allowed for component toggle, skipping this expression ");
                         }
                         
                     },
                   	CallExpression(innerPath) {
                     	const callee = innerPath.get("callee");
                       	const calleeName = callee.node.name;
-                      	if (!callee.isIdentifier() || !callee.isArrowFunctionExpression()) innerPath.skip();
+                      	if (!callee.isIdentifier() || !callee.isArrowFunctionExpression()) {
+                      
+                          innerPath.skip()};
                       	[funcDeclaration,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode] = funcBlock(flagSet,calleeName,callee,innerPath,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode);
                       	if (calleeName && elementNode && Object.hasOwn(deadFunc,calleeName)) {
                         	deadFunc[calleeName].count += 1; 
