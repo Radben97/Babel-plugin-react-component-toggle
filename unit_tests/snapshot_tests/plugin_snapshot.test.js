@@ -250,6 +250,66 @@ pluginTester({
             pluginOptions: {
             flagSet: { TEST_FLAG: true, internalflag: false }
         }
+        },
+        {
+            title: 'Test14: Test to check if conditional expression inside a map function resolves properly (enclosed in a block)',
+            code: `
+                import {TestComponent1, TestComponent2} from 'react'
+                const app = () => {
+                return <div>
+                    {[1,2,3,4,5].map((item,index) =>
+                    {TEST_FLAG ? <li key={index}>
+                        {internalflag ? <TestComponent1/> : <TestComponent2 />}
+                        <p>Item: {item} </p>
+                    </li> : <p>{item}</p>
+})}
+                    </div>}
+                
+            `,
+            snapshot: true,
+            pluginOptions: {
+            flagSet: { TEST_FLAG: true, internalflag: false }
+            }
+        },
+        {
+            title: 'Test15: Test to check if conditional expression inside a map function resolves properly ',
+            code: `
+                import {TestComponent1, TestComponent2} from 'react'
+                const app = () => {
+                return <div>
+                    {[1,2,3,4,5].map((item,index) =>
+                    TEST_FLAG ? <li key={index}>
+                        {internalflag ? <TestComponent1/> : <TestComponent2 />}
+                        <p>Item: {item} </p>
+                    </li> : <p>{item}</p>
+)}
+                    </div>}
+                
+            `,
+            snapshot: true,
+            pluginOptions: {
+            flagSet: { TEST_FLAG: true, internalflag: false }
+            }
+        },
+        {
+            title: 'Test16: Test to check if conditional expression inside a map function resolves properly (with false flag) ',
+            code: `
+                import {TestComponent1, TestComponent2} from 'react'
+                const app = () => {
+                return <div>
+                    {[1,2,3,4,5].map((item,index) =>
+                    internalflag ? <li key={index}>
+                        {internalflag ? <TestComponent1/> : <TestComponent2 />}
+                        <p>Item: {item} </p>
+                    </li> : <p>{item}</p>
+)}
+                    </div>}
+                
+            `,
+            snapshot: true,
+            pluginOptions: {
+            flagSet: { TEST_FLAG: true, internalflag: false }
+            }
         }
     ]
 })

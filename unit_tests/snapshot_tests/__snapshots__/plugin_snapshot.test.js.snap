@@ -335,148 +335,172 @@ const app = () => {
 exports[`React-Toggle-Component 13. Test13: If plugin skips toggling if it isnt part of the 5 expressions(conditional expression): 13. Test13: If plugin skips toggling if it isnt part of the 5 expressions(conditional expression) 1`] = `
 
 
-            import React from 'react';
-import {ComponentRender3,TestComponent1} from 'react';
-<div>hello</div>
-// CASE 4: Prop Drilling (Middle Layer)
-const MiddleLayer = ({ isFeatureOn }) => (
-  <div className="middle-layer">
-    <DeepComponent isFeatureOn={isFeatureOn} />
-  </div>
-);
-
-
-const TestComponent2 = () => (
-  <div className="comp-2">
-    {console.log("Rendering Component 2")}
-    <h1>Standard UI</h1>
-  </div>
-);
-
-const componentRender2 = (
-    <div className="wrapper-b">
-  {internalflag && <TestComponent1 />}
-  <TestComponent5 />
+import {Component,Component1} from 'react'
+const isEnabled = TEST_FLAG && <Component />;
+const app = () => {
+    return <div>
+    {TEST_FLAG ? (SHOW_AD ? <AdBanner /> : <ComponentRender3 />) : (IS_MAINTENANCE ? <MaintenanceMode /> : null)
+    }
+    <>{internalflag && <div>hello</div>}</>
+    <div>{isEnabled}</div>
+    <>hello</>
     </div>
-  );
-const componentRender3 = (<div>hello</div>)
-const getLayout1 = () => {
-    	if (internalflag){
-        	return componentRender2
-        } else {
-        	return componentRender2
-        }
     }
 
-function getLayout() {
-    if (internalflag) {
-      return <ComponentRender3/>;
-    } else return <TestComponent5 />;
-  };
-const getLayout2 = () => <div>hello</div>
 
-const App = () => {
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { Component, Component1 } from "react";
+const isEnabled = TEST_FLAG && <Component />;
+const app = () => {
   return (
-    <div className="app-root">
-      
-      <header>
-        <h1>Product Dashboard</h1>
-      </header>
+    <div>
+      {TEST_FLAG ? (
+        SHOW_AD ? (
+          <AdBanner />
+        ) : (
+          <ComponentRender3 />
+        )
+      ) : IS_MAINTENANCE ? (
+        <MaintenanceMode />
+      ) : null}
 
-      
-      
-      {internalflag ? <ContentComponent /> : <MiddleLayer isFeatureOn = {isFeatureOn}/>}
-      {TEST_FLAG && componentRender3}
-
-     
-
-      
-      {getLayout()}
-       {getLayout1()}
-	  {getLayout2()}
-       
-
-      
-       {TEST_FLAG 
-  ? (SHOW_AD ? componentRender2 : <ComponentRender3 />) 
-  : (IS_MAINTAINANCE ? <MaintenanceMode/> : null)
-}
-       <></>
-      <ContentComponent flag={internalFlag} />
-        
-      <footer>System Status: {internalFlag ? "Stable" : "Legacy"}</footer>
-       
+      <div>{isEnabled}</div>
     </div>
   );
 };
 
-export default App;
-       
-function greet() {}
+`;
 
+exports[`React-Toggle-Component 14. Test14: Test to check if conditional expression inside a map function resolves properly (enclosed in a block): 14. Test14: Test to check if conditional expression inside a map function resolves properly (enclosed in a block) 1`] = `
+
+
+                import {TestComponent1, TestComponent2} from 'react'
+                const app = () => {
+                return <div>
+                    {[1,2,3,4,5].map((item,index) =>
+                    {TEST_FLAG ? <li key={index}>
+                        {internalflag ? <TestComponent1/> : <TestComponent2 />}
+                        <p>Item: {item} </p>
+                    </li> : <p>{item}</p>
+})}
+                    </div>}
+                
             
 
       ↓ ↓ ↓ ↓ ↓ ↓
 
-import React from "react";
-import { ComponentRender3 } from "react";
-<div>hello</div>;
-// CASE 4: Prop Drilling (Middle Layer)
-const MiddleLayer = ({ isFeatureOn }) => (
-  <div className="middle-layer">
-    <DeepComponent isFeatureOn={isFeatureOn} />
-  </div>
-);
-const TestComponent2 = () => (
-  <div className="comp-2">
-    {console.log("Rendering Component 2")}
-    <h1>Standard UI</h1>
-  </div>
-);
-const componentRender2 = (
-  <div className="wrapper-b">
-    <TestComponent5 />
-  </div>
-);
-function getLayout() {
-  if (internalflag) {
-    return <ComponentRender3 />;
-  } else return <TestComponent5 />;
-}
-const getLayout2 = () => <div>hello</div>;
-const App = () => {
+import { TestComponent2 } from "react";
+const app = () => {
   return (
-    <div className="app-root">
-      <header>
-        <h1>Product Dashboard</h1>
-      </header>
-
-      <MiddleLayer isFeatureOn={isFeatureOn} />
-      <div>hello</div>
-
-      {getLayout()}
-      <div className="wrapper-b">
-        <TestComponent5 />
-      </div>
-      {getLayout2()}
-
-      {TEST_FLAG ? (
-        SHOW_AD ? (
-          componentRender2
-        ) : (
-          <ComponentRender3 />
-        )
-      ) : IS_MAINTAINANCE ? (
-        <MaintenanceMode />
-      ) : null}
-
-      <ContentComponent flag={internalFlag} />
-
-      <footer>System Status: {internalFlag ? "Stable" : "Legacy"}</footer>
+    <div>
+      {[1, 2, 3, 4, 5].map((item, index) => (
+        <li key={index}>
+          <TestComponent2 />
+          <p>Item: {item} </p>
+        </li>
+      ))}
     </div>
   );
 };
-export default App;
-function greet() {}
+
+`;
+
+exports[`React-Toggle-Component 14. Test14: Test to check if conditional expression inside a map function resolves properly: 14. Test14: Test to check if conditional expression inside a map function resolves properly 1`] = `
+
+
+                import {TestComponent1, TestComponent2} from 'react'
+                const app = () => {
+                return <div>
+                    {[1,2,3,4,5].map((item,index) =>
+                    {TEST_FLAG ? <li key={index}>
+                        {internalflag ? <TestComponent1/> : <TestComponent2 />}
+                        <p>Item: {item} </p>
+                    </li> : <p>{item}</p>
+})}
+                    </div>}
+                
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { TestComponent2 } from "react";
+const app = () => {
+  return (
+    <div>
+      {[1, 2, 3, 4, 5].map((item, index) => (
+        <li key={index}>
+          <TestComponent2 />
+          <p>Item: {item} </p>
+        </li>
+      ))}
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 15. Test15: Test to check if conditional expression inside a map function resolves properly : 15. Test15: Test to check if conditional expression inside a map function resolves properly  1`] = `
+
+
+                import {TestComponent1, TestComponent2} from 'react'
+                const app = () => {
+                return <div>
+                    {[1,2,3,4,5].map((item,index) =>
+                    TEST_FLAG ? <li key={index}>
+                        {internalflag ? <TestComponent1/> : <TestComponent2 />}
+                        <p>Item: {item} </p>
+                    </li> : <p>{item}</p>
+)}
+                    </div>}
+                
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { TestComponent2 } from "react";
+const app = () => {
+  return (
+    <div>
+      {[1, 2, 3, 4, 5].map((item, index) => (
+        <li key={index}>
+          <TestComponent2 />
+          <p>Item: {item} </p>
+        </li>
+      ))}
+    </div>
+  );
+};
+
+`;
+
+exports[`React-Toggle-Component 16. Test16: Test to check if conditional expression inside a map function resolves properly (with false flag) : 16. Test16: Test to check if conditional expression inside a map function resolves properly (with false flag)  1`] = `
+
+
+                import {TestComponent1, TestComponent2} from 'react'
+                const app = () => {
+                return <div>
+                    {[1,2,3,4,5].map((item,index) =>
+                    internalflag ? <li key={index}>
+                        {internalflag ? <TestComponent1/> : <TestComponent2 />}
+                        <p>Item: {item} </p>
+                    </li> : <p>{item}</p>
+)}
+                    </div>}
+                
+            
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+import { TestComponent1, TestComponent2 } from "react";
+const app = () => {
+  return (
+    <div>
+      {[1, 2, 3, 4, 5].map((item, index) => (
+        <p>{item}</p>
+      ))}
+    </div>
+  );
+};
 
 `;
