@@ -1,14 +1,28 @@
-export default function testFunc(babel) {
+module.exports = function testFunc(babel) {
   const { types: t } = babel;
   let flagVal;
   let deadFunc = {};
-  let flagSet = {TEST_FLAG: true, internalflag: false};
-  function funcBlock(flagSet,calleeName,callee,innerPath,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode) {
+  function funcBlock(mapFuncJSXContainerFlag,flagSet,calleeName,callee,innerPath,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode) {
   		let funcDeclaration;
     	if (calleeName){funcDeclaration = innerPath.scope.getBinding(calleeName);} 
     	if (funcDeclaration && !funcDeclaration.constant) return;
     	let bodyBlock;
     	let ifStatement;
+    	let memStatement = false;
+    	let memObj;
+    	let memProp;
+    	let memCond;
+    	let memParams;
+    	let mapCall1;
+    	let mapCall2;
+    	let mapArrowFunc1;
+    	let mapArrowFunc2;
+    	
+    	isValidLogicExp = true;
+        validFlagCheck = true;
+    	if (callee.isMemberExpression()) {
+          	memStatement = true;
+        }
     	if (funcDeclaration && funcDeclaration.path.isVariableDeclarator()) {
          
           if (funcDeclaration.path.get("init").isFunction()) {	
@@ -27,8 +41,7 @@ export default function testFunc(babel) {
         	const tester = ifStatement.get("test").node.name;
           	if (Object.hasOwn(flagSet,tester)) {
               		  flagVal = flagSet[tester];
-            		  isValidLogicExp = true;
-                      validFlagCheck = true;
+            		  
                       let returnStatement1 = null;
                       let returnStatement2 = null;
                       let bodyPath1;
@@ -144,9 +157,73 @@ export default function testFunc(babel) {
               		  
               			
             } // if-tester-end
+        } else if (memStatement) {
+          	memProp = innerPath.get("callee").get("property");
+          	memObj = innerPath.get("callee").get("object");
+          	
+        	if (memProp && memProp.node.name === "map") {
+              	const memNode = innerPath.get("callee").node;
+            	const memArg = innerPath.get("arguments").find(p => p.isArrowFunctionExpression());
+              	if (memArg && memArg.get("body").isConditionalExpression()) {
+                  memCond = memArg.get("body");
+                  } else if (memArg && memArg.get("body").isBlockStatement()) {
+                  const blockBody = memArg.get("body").get("body").find(p => p.isExpressionStatement());
+                  if (blockBody) {
+                    memCond = blockBody.get("expression");
+                  }
+                }
+              	if (memCond) {
+                	const memTester = memCond.get("test").node.name;
+                  	if (Object.hasOwn(flagSet,memTester)) {
+                    	flagVal = flagSet[memTester];
+                      	const consequentNode = memCond.get("consequent");
+                      	const alternateNode = memCond.get("alternate");
+                      if (consequentNode.isJSXElement() && alternateNode.isJSXElement()) {
+                        mapArrowFunc1 = t.ArrowFunctionExpression(memArg.node.params, consequentNode.node);
+                        mapCall1 = t.CallExpression(memNode, [mapArrowFunc1]);
+                        const finMapNode1 = t.JSXExpressionContainer(mapCall1);
+                        mapArrowFunc2 = t.ArrowFunctionExpression(memArg.node.params, alternateNode.node);
+                        mapCall2 = t.CallExpression(memNode, [mapArrowFunc2]);
+                        const finMapNode2 = t.JSXExpressionContainer(mapCall2);
+                        const consequentComponentName = consequentNode.get("openingElement").get("name").node.name;
+                        const alternateComponentName = alternateNode.get("openingElement").get("name").node.name;
+                        const consequentElementNode = finMapNode1;
+                        const alternateElementNode = finMapNode2;
+                        
+                        if (flagVal) {
+                          	
+                          componentName = consequentComponentName;
+                          elementNode = consequentElementNode;
+                          if (alternateComponentName && alternateElementNode && Object.hasOwn(deadFunc, alternateComponentName)) {
+                            deadFunc[alternateComponentName].count += 1;
+                          } else if (componentName && alternateElementNode && !Object.hasOwn(deadFunc, alternateComponentName)) {
+                            deadFunc[alternateComponentName] = { binding: innerPath.scope.getBinding(alternateComponentName), count: 1 };
+                            falseFlag = true;
+                          }
+                        }
+                        if (!flagVal) {
+                          componentName = alternateComponentName;
+                          elementNode = alternateElementNode;
+                          falseFlag = true;
+                          if (consequentComponentName && consequentElementNode && Object.hasOwn(deadFunc, consequentComponentName)) {
+                            deadFunc[consequentComponentName].count += 1;
+                          } else if (consequentComponentName && consequentElementNode && !Object.hasOwn(deadFunc, consequentComponentName)) {
+                            deadFunc[consequentComponentName] = { binding: innerPath.scope.getBinding(consequentComponentName), count: 1 };
+                            mapFuncJSXContainerFlag = true;
+                            falseFlag = true;
+                          }
+                        }
+                        
+                      } else {
+                        console.warn("❌ [plugin-react-component-toggle]: The alternate and consequent input to the inner conditional expression inside map's callback function should only be JSXElements, This node is skipped.");
+                      }   
+                    }
+                }
+            }
         }
+     
      //if-varDecl-end
-    return [funcDeclaration,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode];
+    return [mapFuncJSXContainerFlag,funcDeclaration,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode];
   }
   function funcCleaner(deadFunc,path) {
   	for (const [funcName,funcObj] of Object.entries(deadFunc)) {
@@ -168,16 +245,17 @@ export default function testFunc(babel) {
   return {
     	name: "React-Toggle-Component",
     	visitor: {
-         	JSXExpressionContainer(path,state) {
+            JSXExpressionContainer(path, state) {
+                let flagSet = state.opts.flagSet || {};
                 let funcDeclaration;
               	let componentName;
-              	let componentAttributes;
               	let elementNode;
               	let consequentComponent;
               	let alternateComponent;
               	let falseFlag = false;
               	let isValidLogicExp = false;
               	let validFlagCheck = false;
+              	let mapFuncJSXContainerFlag = false;
             	path.traverse({            
                   	ConditionalExpression(innerPath) {
                    	 if (!Object.hasOwn(flagSet,innerPath.get("test").node.name)) innerPath.skip();
@@ -282,12 +360,13 @@ export default function testFunc(babel) {
                         
                     },
                   	CallExpression(innerPath) {
+                      	let mapFlag;
                     	const callee = innerPath.get("callee");
                       	const calleeName = callee.node.name;
-                      	if (!callee.isIdentifier() || !callee.isArrowFunctionExpression()) {
+                      	if (!callee.isIdentifier() || !callee.isArrowFunctionExpression() || !callee.isMemberExpression()) {
                       
                           innerPath.skip()};
-                      	[funcDeclaration,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode] = funcBlock(flagSet,calleeName,callee,innerPath,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode);
+                      	[mapFuncJSXContainerFlag,funcDeclaration,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode] = funcBlock(mapFuncJSXContainerFlag,flagSet,calleeName,callee,innerPath,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode);
                       	if (calleeName && elementNode && Object.hasOwn(deadFunc,calleeName)) {
                         	deadFunc[calleeName].count += 1; 
                         } else if (calleeName && elementNode && !Object.hasOwn(deadFunc,calleeName)) {
@@ -303,9 +382,9 @@ export default function testFunc(babel) {
                 }
               	else if (componentName && isValidLogicExp && validFlagCheck && !flagVal) {
                   	if (!falseFlag) path.remove();
-                  	else {path.replaceWith(elementNode);
-                         }
-                  	//funcCleaner(deadFunc,path);
+                  	
+                  	else {path.replaceWith(elementNode)}	
+                  //funcCleaner(deadFunc,path);
                 }
             },
           	Program: {
@@ -319,9 +398,12 @@ export default function testFunc(babel) {
                             } 
                           path.remove();
                         }
-                    })
+                    });
+                  
                 }
             }// short-circuiting conversion completed
         }
     }
   }
+
+
