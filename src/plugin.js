@@ -1,7 +1,8 @@
-module.exports = function testFunc(babel) {
+export default function testFunc(babel) {
   const { types: t } = babel;
   let flagVal;
   let deadFunc = {};
+  let flagSet = {TEST_FLAG: true, internalflag: false};
   function funcBlock(mapFuncJSXContainerFlag,flagSet,calleeName,callee,innerPath,isValidLogicExp,validFlagCheck,falseFlag,componentName,elementNode) {
   		let funcDeclaration;
     	if (calleeName){funcDeclaration = innerPath.scope.getBinding(calleeName);} 
@@ -109,7 +110,7 @@ module.exports = function testFunc(babel) {
                         }	
               		  if (returnStatement2 && returnStatement2.node.argument !== null) {
                           falseFlag = true;
-                          if (returnStatement1.get("argument").isJSXElement() && !innerPath.scope.getBinding(returnStatement1.get("argument").get("openingElement").get("name").node.name)){
+                          if (returnStatement2.get("argument").isJSXElement() && !innerPath.scope.getBinding(returnStatement2.get("argument").get("openingElement").get("name").node.name)){
                       	  falsecomponentName =returnStatement2.get("argument").get("openingElement").get("name").node.name;
                           falseelementNode = returnStatement2.get("argument").node;  
                           }
@@ -158,68 +159,87 @@ module.exports = function testFunc(babel) {
               			
             } // if-tester-end
         } else if (memStatement) {
-          	memProp = innerPath.get("callee").get("property");
-          	memObj = innerPath.get("callee").get("object");
-          	
-        	if (memProp && memProp.node.name === "map") {
-              	const memNode = innerPath.get("callee").node;
-            	const memArg = innerPath.get("arguments").find(p => p.isArrowFunctionExpression());
-              	if (memArg && memArg.get("body").isConditionalExpression()) {
-                  memCond = memArg.get("body");
-                  } else if (memArg && memArg.get("body").isBlockStatement()) {
-                  const blockBody = memArg.get("body").get("body").find(p => p.isExpressionStatement());
-                  if (blockBody) {
-                    memCond = blockBody.get("expression");
+          memProp = innerPath.get("callee").get("property");
+          memObj = innerPath.get("callee").get("object");
+          
+          if (memProp && memProp.node.name === "map") {
+              const memNode = innerPath.get("callee").node;
+              const memArg = innerPath.get("arguments").find(p => p.isArrowFunctionExpression());
+              
+              if (memArg) {
+                const arrowBody = memArg.get("body");
+                
+                // Case 1: Implicit return: .map((item) => TEST_FLAG ? <a/> : <b/>)
+                if (arrowBody.isConditionalExpression()) {
+                  memCond = arrowBody;
+                } 
+                // Case 2: Block statement body: .map((item) => { TEST_FLAG ? <a/> : <b/> })
+                else if (arrowBody.isBlockStatement()) {
+                  const bodyStatements = arrowBody.get("body");
+                  // Ensure it's a single statement and that statement is either a Return or an Expression
+                  if (bodyStatements.length === 1) {
+                    const singleStmt = bodyStatements[0];
+                    if (singleStmt.isReturnStatement()) {
+                      const arg = singleStmt.get("argument");
+                      if (arg.isConditionalExpression()) memCond = arg;
+                    } else if (singleStmt.isExpressionStatement()) {
+                      const expr = singleStmt.get("expression");
+                      if (expr.isConditionalExpression()) memCond = expr;
+                    }
                   }
                 }
-              	if (memCond) {
-                	const memTester = memCond.get("test").node.name;
-                  	if (Object.hasOwn(flagSet,memTester)) {
-                    	flagVal = flagSet[memTester];
-                      	const consequentNode = memCond.get("consequent");
-                      	const alternateNode = memCond.get("alternate");
+              }
+
+              if (memCond) {
+                  const memTester = memCond.get("test").node.name;
+                  if (Object.hasOwn(flagSet, memTester)) {
+                      flagVal = flagSet[memTester];
+                      const consequentNode = memCond.get("consequent");
+                      const alternateNode = memCond.get("alternate");
+                      
                       if (consequentNode.isJSXElement() && alternateNode.isJSXElement()) {
+                        // Reconstruct clean arrow functions with implicit returns using the selected branch
                         mapArrowFunc1 = t.ArrowFunctionExpression(memArg.node.params, consequentNode.node);
                         mapCall1 = t.CallExpression(memNode, [mapArrowFunc1]);
                         const finMapNode1 = t.JSXExpressionContainer(mapCall1);
+                        
                         mapArrowFunc2 = t.ArrowFunctionExpression(memArg.node.params, alternateNode.node);
                         mapCall2 = t.CallExpression(memNode, [mapArrowFunc2]);
                         const finMapNode2 = t.JSXExpressionContainer(mapCall2);
+                        
                         const consequentComponentName = consequentNode.get("openingElement").get("name").node.name;
                         const alternateComponentName = alternateNode.get("openingElement").get("name").node.name;
                         const consequentElementNode = finMapNode1;
                         const alternateElementNode = finMapNode2;
                         
                         if (flagVal) {
-                          	
-                          componentName = consequentComponentName;
-                          elementNode = consequentElementNode;
-                          if (alternateComponentName && alternateElementNode && Object.hasOwn(deadFunc, alternateComponentName)) {
-                            deadFunc[alternateComponentName].count += 1;
-                          } else if (componentName && alternateElementNode && !Object.hasOwn(deadFunc, alternateComponentName)) {
-                            deadFunc[alternateComponentName] = { binding: innerPath.scope.getBinding(alternateComponentName), count: 1 };
+                            componentName = consequentComponentName;
+                            elementNode = consequentElementNode;
+                            if (alternateComponentName && alternateElementNode && Object.hasOwn(deadFunc, alternateComponentName)) {
+                                deadFunc[alternateComponentName].count += 1; 
+                            } else if (componentName && alternateElementNode && !Object.hasOwn(deadFunc, alternateComponentName)) {
+                                deadFunc[alternateComponentName] = { binding: innerPath.scope.getBinding(alternateComponentName), count: 1 };
+                                falseFlag = true;
+                            }
+                        } else {
+                            componentName = alternateComponentName;
+                            elementNode = alternateElementNode;
                             falseFlag = true;
-                          }
-                        }
-                        if (!flagVal) {
-                          componentName = alternateComponentName;
-                          elementNode = alternateElementNode;
-                          falseFlag = true;
-                          if (consequentComponentName && consequentElementNode && Object.hasOwn(deadFunc, consequentComponentName)) {
-                            deadFunc[consequentComponentName].count += 1;
-                          } else if (consequentComponentName && consequentElementNode && !Object.hasOwn(deadFunc, consequentComponentName)) {
-                            deadFunc[consequentComponentName] = { binding: innerPath.scope.getBinding(consequentComponentName), count: 1 };
-                            mapFuncJSXContainerFlag = true;
-                            falseFlag = true;
-                          }
+                            if (consequentComponentName && consequentElementNode && Object.hasOwn(deadFunc, consequentComponentName)) {
+                                deadFunc[consequentComponentName].count += 1; 
+                            } else if (consequentComponentName && consequentElementNode && !Object.hasOwn(deadFunc, consequentComponentName)) {
+                                deadFunc[consequentComponentName] = { binding: innerPath.scope.getBinding(consequentComponentName), count: 1 };
+                                mapFuncJSXContainerFlag = true;
+                                falseFlag = true;
+                            }
                         }
                         
                       } else {
-                        console.warn("❌ [plugin-react-component-toggle]: The alternate and consequent input to the inner conditional expression inside map's callback function should only be JSXElements, This node is skipped.");
-                      }   
-                    }
-                }
-            }
+                          console.warn("❌ [plugin-react-component-toggle]: The alternate and consequent input to the inner conditional expression inside map's callback function should only be JSXElements, This node is skipped.");
+                      }    
+                  }
+              }
+          }
         }
      
      //if-varDecl-end
@@ -245,10 +265,10 @@ module.exports = function testFunc(babel) {
   return {
     	name: "React-Toggle-Component",
     	visitor: {
-            JSXExpressionContainer(path, state) {
-                let flagSet = state.opts.flagSet || {};
+         	JSXExpressionContainer(path,state) {
                 let funcDeclaration;
               	let componentName;
+              	let componentAttributes;
               	let elementNode;
               	let consequentComponent;
               	let alternateComponent;
@@ -287,7 +307,7 @@ module.exports = function testFunc(babel) {
                       	componentName = innerPath.get("consequent").get("openingElement").get("name").node.name;
                         elementNode = consequentComponent;
                         if (alternateComponentName && elementNode && Object.hasOwn(deadFunc,alternateComponentName)) {
-                        	deadFunc[consequentComponentName].count += 1; 
+                        	deadFunc[alternateComponentName].count += 1; 
                         } else if (alternateComponentName && elementNode && !Object.hasOwn(deadFunc,alternateComponentName)) {
                         	deadFunc[alternateComponentName] = {binding: bindingAlternate,count: 1};
                         }
@@ -346,6 +366,7 @@ module.exports = function testFunc(babel) {
                                 }
                               }
                             };
+                          if (!flagVal) {
                           const logicalComonentBinding = innerPath.scope.getBinding(logicalComponentName);
                           if (logicalComponentName && logicalComonentBinding && Object.hasOwn(deadFunc,logicalComponentName)) {
                         	deadFunc[logicalComponentName].count += 1; 
@@ -356,6 +377,7 @@ module.exports = function testFunc(babel) {
                         } else {
                           	if (innerPath.node.operator !== "&&") console.warn("❌ [plugin-react-component-toggle]: Logical expressions should have '&&' operator for component toggle, skipping this expression ");
                         	console.warn("❌ [plugin-react-component-toggle]: Nested logical expressions are not allowed for component toggle, skipping this expression ");
+                        }
                         }
                         
                     },
@@ -394,9 +416,11 @@ module.exports = function testFunc(babel) {
                   path.traverse({
                     	JSXFragment(path) {
                         	if (path.get("children").length < 1) {
-                            	path.skip()
-                            } 
-                          path.remove();
+                            	path.remove()
+                            } else {
+                            path.skip();
+                            }
+                          
                         }
                     });
                   
@@ -405,5 +429,3 @@ module.exports = function testFunc(babel) {
         }
     }
   }
-
-
